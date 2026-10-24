@@ -29,7 +29,7 @@
 
 ## 30 秒跑起来（无需 Token）
 
-仓库内置录制的 MCP 响应，离线即可完整体验：
+仓库内置演示数据（结构复刻真实 MCP 响应），离线即可完整体验：
 
 ```bash
 git clone https://github.com/<you>/mcd-party-planner.git

@@ -165,6 +165,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--size", type=int, default=10)
     p.add_argument("--budget", type=float)
     p.add_argument("--format", default="markdown", choices=["markdown", "json", "html"])
+    p.add_argument("-o", "--output")
     p.set_defaults(func=cmd_demo)
 
     return parser

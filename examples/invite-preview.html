@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>生日派对</title>
+<style>
+  :root { --mcd-yellow:#FFC72C; --mcd-red:#DA291C; --ink:#2b2b2b; --paper:#fffdf5; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "PingFang SC","Microsoft YaHei",sans-serif; background: var(--paper);
+         color: var(--ink); display:flex; justify-content:center; padding:32px 16px; }
+  .card { width: 100%; max-width: 520px; background:#fff; border-radius:20px;
+          border:3px solid var(--mcd-yellow); box-shadow:0 12px 32px rgba(218,41,28,.12);
+          overflow:hidden; }
+  .hero { background: linear-gradient(135deg,var(--mcd-yellow),#ffd95e); padding:28px 24px 20px; }
+  .hero .tag { display:inline-block; background:var(--mcd-red); color:#fff; font-size:12px;
+               padding:3px 10px; border-radius:999px; margin-bottom:10px; }
+  .hero h1 { font-size:24px; }
+  .hero p { margin-top:6px; font-size:13px; opacity:.75; }
+  .body { padding:20px 24px 24px; }
+  .row { display:flex; justify-content:space-between; padding:10px 0;
+         border-bottom:1px dashed #eadfae; font-size:14px; }
+  .row:last-of-type { border-bottom:none; }
+  .row .k { color:#8a7c4e; }
+  .row .v { font-weight:600; text-align:right; }
+  .why { margin-top:14px; background:#fff8e1; border-radius:12px; padding:12px 14px; }
+  .why h2 { font-size:13px; color:var(--mcd-red); margin-bottom:6px; }
+  .why li { font-size:12.5px; margin-left:18px; margin-bottom:3px; }
+  .footer { margin-top:16px; font-size:11px; color:#a89c78; text-align:center; line-height:1.6; }
+  .arches { text-align:center; font-size:26px; margin-top:4px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="hero">
+      <span class="tag">🎂 生日派对</span>
+      <h1>生日派对</h1>
+      <p>杭州 · 杭州湖滨餐厅</p>
+    </div>
+    <div class="body">
+      <div class="row"><span class="k">📅 日期</span><span class="v">10 月 31 日（周六）</span></div>
+      <div class="row"><span class="k">⏰ 场次</span><span class="v">14:00 - 16:00</span></div>
+      <div class="row"><span class="k">👥 人数</span><span class="v">10 人</span></div>
+      <div class="row"><span class="k">💰 参考价</span><span class="v">¥168 / 人</span></div>
+      <div class="why"><h2>为什么选这一场</h2><ul><li>城市匹配「杭州」</li><li>门店选择「杭州湖滨餐厅」（该城市共 3 家可选）</li><li>自动选定最近周末 2026-10-31（共 5 个周末可约）</li><li>周末场，亲友到场率最高</li><li>下午场，适合小朋友作息</li><li>容量 20 人 ≥ 预计 10 人</li></ul></div>
+      <div class="arches">🍟🍔🥤</div>
+      <div class="footer">由「麦麦派对策划师」基于麦当劳 MCP 实时数据生成<br>
+      餐品、价格与供应状态以麦当劳官方渠道为准 · 本项目为独立开发作品，非麦当劳官方产品</div>
+    </div>
+  </div>
+</body>
+</html>
