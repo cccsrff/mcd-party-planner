@@ -45,6 +45,24 @@ class TestDemoCommand(unittest.TestCase):
         self.assertIn("14:00 - 16:00", out)
         self.assertIn("mcdparty book", out)
 
+    def test_demo_never_claims_live_data(self):
+        """Offline replay must say so - and must not hand out a runnable --confirm order."""
+        code, out = run_cli(["demo"])
+        self.assertEqual(code, 0)
+        self.assertIn("非实时数据", out)
+        book_lines = [line for line in out.splitlines() if line.startswith("mcdparty book")]
+        self.assertTrue(book_lines, "demo should still show the preview command")
+        for line in book_lines:
+            self.assertNotIn("--confirm", line, "offline demo must not print a confirming order")
+
+    def test_live_render_does_offer_confirm(self):
+        from mcdparty.render import render
+        text = render(make_plan(), live=True)
+        book_lines = [line for line in text.splitlines() if line.startswith("mcdparty book")]
+        self.assertTrue(book_lines)
+        self.assertTrue(all("--confirm" in line for line in book_lines))
+        self.assertIn("实时返回", text)
+
     def test_demo_html(self):
         code, out = run_cli(["demo", "--format", "html"])
         self.assertEqual(code, 0)

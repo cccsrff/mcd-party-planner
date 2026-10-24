@@ -22,7 +22,7 @@
 - 选题确定：**「麦麦派对策划师」**——把 4 次查询压成 1 条命令，可解释推荐 + HTML 邀请函 + 默认 dry-run 下单
 - 与用户确认两件只能由用户做的事：MCP Token 申请（open.mcd.cn/mcp 手机登录）、GitHub 推送授权
 
-### 第 2 轮：架构与编码（纯标准库，零依赖）
+### 第 2 轮：架构与编码（纯标准库，无第三方依赖）
 
 WorkBuddy 一次性产出全部源码（`mcdparty/` 包，约 1200 行）：
 
@@ -39,7 +39,7 @@ WorkBuddy 一次性产出全部源码（`mcdparty/` 包，约 1200 行）：
 
 ### 第 3 轮：测试驱动修复（3 轮迭代）
 
-WorkBuddy 编写 37 个单元测试（`tests/`，纯 unittest），首轮 12 个失败，逐根因修复：
+WorkBuddy 编写 39 个单元测试（`tests/`，纯 unittest），首轮 12 个失败，逐根因修复：
 
 1. **回放信封缺陷**：`ReplayTransport` 未把业务 payload 包成 `tools/call` 的 `content` 信封 → `_unwrap_content` 解不出数据。修复：新增 `_tool_envelope()`。
 2. **`as_list` 不递归**：`{"data": {"list": [...]}}` 嵌套结构返回空。修复：键名匹配时递归进 dict 值。
@@ -47,35 +47,65 @@ WorkBuddy 编写 37 个单元测试（`tests/`，纯 unittest），首轮 12 个
 4. **fixture 精度**：指定日期 2026-11-08 时回放仍返回 10-31 的场次。修复：新增参数级 fixture（digest 必须用 Python `json.dumps(sort_keys=True)` 计算，JS 序列化哈希不一致——踩坑后修正）。
 5. **`tools` 子命令崩溃**：`_client` 访问不存在的 `args.demo`。修复：parent parser 统一注入 `--demo`。
 
-每轮修复后全量回归，最终 **37/37 通过**。
+每轮修复后全量回归，最终 **39/39 通过**。
 
 ### 第 4 轮：参赛合规与文档
 
 - `CONTEST_DECLARATION.md`：从官方仓库拉取原文，**程序化逐字节比对确认一致**（官方要求内容不可改动）
 - `mcp-config.example.json`：仅 `${MCD_MCP_TOKEN}` 环境变量占位符
-- `MCP_INTEGRATION.md`：Server 信息、5 个 Tool 的参数/用途/返回处理、调用流程图、业务价值、限流策略
-- `README.md`：痛点表、30 秒离线体验、真实输出转录、架构图、设计取舍
-- `skill/SKILL.md`：WorkBuddy Skill 打包（含 Agent 铁律：查询与下单分离、理由必须转述、Token 保密）
-- `py_compile` 全量通过；git 本地仓库初始化并完成 2 次提交
+- `MCP_INTEGRATION.md`：Server 信息、5 个 Tool 的参数与返回处理、调用链、错误映射、录制回放
+- `README.md`：价值主张、快速开始、命令表、评分规则、安全边界、下单前须知
+- `skill/SKILL.md`：WorkBuddy Skill 打包（工作规则 6 条：查询与下单分离、理由必须转述、Token 保密等）
+- `py_compile` 全量通过；本地仓库初始化并提交
 
-## 三、验证证据
+### 第 5 轮：三轮独立审查与优化
+
+3 个独立子代理分别从**视觉美学**、**风格化文案**、**用途价值**三个视角审查，循环「审查 → 优化 → 复审」三轮：
+
+- 第 1 轮修掉三处会被评委戳穿的口径：「5 步变 1 条」不成立、测试数 32/33 不一致、离线演示自称实时数据；同时补上安全边界（日期不可约直接报错、`--session` 锁定场次、未知城市不兜底、回放参数校验）
+- 第 2 轮修掉残留话术与视觉缺陷：demo 产物仍写「实时返回」、演示稿印出 `--confirm` 下单命令、邀请函理由列表缩进错位 58px、兜底分支会把内部评分日志印上邀请函
+- 第 3 轮：终审复核
+- 结果：测试从 33 增至 39，README 从约 180 行压到 140 行，全仓库 emoji 归零
+
+## 三、验证证据（以下为真实终端转录）
 
 ```text
 $ python -m unittest discover -s tests
-Ran 37 tests in 0.056s
+Ran 39 tests in 0.077s
+
 OK
 
 $ python -m mcdparty tools --demo
 共 33 个工具，其中派对相关 5 个：
- ★ query-party-city / query-party-store / query-partystore-date
- ★ query-partystore-session / party-order-create
+   list-nutrition-foods         餐品营养信息列表：获取麦当劳常见餐品的营养成分数据
+   ...（省略 27 行）...
+ ★ query-partystore-date        主题活动可预约日期查询：查询指定门店下主题活动的可预约日期列表
+ ★ query-partystore-session     主题活动可预约日期场次查询：查询指定门店、指定日期下主题活动的可预约场次列表
+ ★ party-order-create           主题活动订单创建：创建主题活动订单
 
 $ python -m mcdparty demo --city 杭州 --occasion birthday --size 12
 # 生日派对策划案
-- 门店：杭州湖滨餐厅（上城区平海路 118 号）| 日期：10 月 31 日（周六）| 场次：14:00 - 16:00
-- 理由：周末场 +3 / 下午场适合小朋友 / 容量 20 人 ≥ 预计 12 人
-调用链：query-party-city -> query-party-store -> query-partystore-date -> query-partystore-session
+- 城市：杭州
+- 门店：杭州湖滨餐厅（上城区平海路 118 号）
+- 日期：10 月 31 日（周六）
+- 场次：14:00 - 16:00
+- 人数：12 人
+- 参考价：¥168/人
+
+## 选择理由
+
+- 门店取列表首家「杭州湖滨餐厅」（当前未按距离或评分排序，3 家可选）
+- 自动选定最近周末 2026-10-31（共 5 天可约，全部是周末）
+- 周末场，亲友到场率最高
+- 下午场，适合小朋友作息
+- 容量 20 人 ≥ 预计 12 人
+
+## 其他可约日期（4 天）
+
+11 月 1 日（周日）、11 月 7 日（周六）、11 月 8 日（周日）、11 月 14 日（周六）
 ```
+
+`demo` 是离线回放（内置 fixtures），输出中会明确标注非实时数据；真实 MCP 路径需配置 `MCD_MCP_TOKEN`。
 
 ## 四、后续步骤（需用户配合）
 

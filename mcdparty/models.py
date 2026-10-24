@@ -193,7 +193,6 @@ class Plan:
 
     request: PartyRequest
     city: Optional[City] = None
-    city_matched: bool = False
     stores: List[Store] = field(default_factory=list)
     store: Optional[Store] = None
     dates: List[str] = field(default_factory=list)

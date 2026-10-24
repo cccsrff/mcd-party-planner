@@ -1,14 +1,13 @@
 """The party planner: chains the 5 McDonald's party MCP tools into a decision.
 
-    query-party-city        -> pick the city
-    query-party-store       -> pick the store (most bookable first)
-    query-partystore-date   -> pick the date (weekend-biased for birthdays)
-    query-partystore-session-> pick the slot (afternoon-biased for kids)
+    query-party-city        -> match the city (no silent fallback)
+    query-party-store       -> first store in the list (no distance/rating sort yet)
+    query-partystore-date   -> nearest weekend when possible
+    query-partystore-session-> scored slot (afternoon-biased for kids)
     party-order-create      -> optional booking, guarded behind --confirm
 
-Every step is explainable: the planner records *why* it picked each option so
-the rendered plan can show its reasoning, and every raw MCP payload is kept in
-``plan.tool_trace`` for auditability.
+Only the session step is scored; store and date are simple heuristics, and the
+reason strings say so. Every raw MCP payload is kept in ``plan.tool_trace``.
 """
 
 from __future__ import annotations
@@ -63,7 +62,6 @@ class PartyPlanner:
         keyword = (request.city or "").strip()
         for city in cities:
             if keyword and (keyword in city.name or city.name in keyword):
-                plan.city_matched = True
                 return city
         raise RuntimeError(
             f"「{keyword or '（空）'}」不在可办派对的城市列表里，不会替你改到别的城市。"

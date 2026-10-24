@@ -1,6 +1,6 @@
 """Command line interface.
 
-    mcdparty tools                     list MCP tools (proves live integration)
+    mcdparty tools                     list MCP tools (connectivity check)
     mcdparty cities [--keyword 杭州]    list party cities
     mcdparty plan --city 杭州 ...       full flow + rendered plan (md/json/html)
     mcdparty book ... --confirm         create the order (dry-run without --confirm)
@@ -80,7 +80,7 @@ def cmd_plan(args) -> int:
     )
     client = _client(args)
     plan = PartyPlanner(client).plan(request)
-    _emit(render(plan, args.format), args,
+    _emit(render(plan, args.format, live=True), args,
           suffix=".md" if args.format == "markdown" else f".{args.format}")
     return 0
 
@@ -91,8 +91,9 @@ def cmd_book(args) -> int:
     planner = PartyPlanner(client)
     plan = planner.plan(request, pin_session=args.session, strict_date=True)
     chosen = plan.chosen
+    label = "下单" if args.confirm else "待下单"
     print(
-        f"待下单：{plan.store.name if plan.store else '-'} · "
+        f"{label}：{plan.store.name if plan.store else '-'} · "
         f"{chosen.date if chosen else '-'} · "
         f"{chosen.start + '-' + chosen.end if chosen else '-'} · "
         f"{args.size} 人",
@@ -124,14 +125,7 @@ def cmd_demo(args) -> int:
             file=sys.stderr,
         )
         return 1
-    if plan.city and not plan.city_matched:
-        print(
-            f"内置演示数据不覆盖「{request.city}」，不做兜底。"
-            "接入真实 MCP 后可查任意城市（见 README「接入真实 MCP」）。",
-            file=sys.stderr,
-        )
-        return 1
-    _emit(render(plan, args.format), args,
+    _emit(render(plan, args.format, live=False), args,
           suffix=".md" if args.format == "markdown" else f".{args.format}")
     trace = " -> ".join(t["tool"] for t in plan.tool_trace)
     print(f"\n调用链：{trace}", file=sys.stderr)
@@ -201,10 +195,10 @@ def main(argv=None) -> int:
     try:
         return args.func(args)
     except MCPError as exc:
-        print(f"MCP 错误: {exc}", file=sys.stderr)
+        print(f"MCP 错误：{exc}", file=sys.stderr)
         return 2
     except (RuntimeError, FileNotFoundError) as exc:
-        print(f"错误: {exc}", file=sys.stderr)
+        print(f"错误：{exc}", file=sys.stderr)
         return 1
 
 

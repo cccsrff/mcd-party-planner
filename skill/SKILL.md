@@ -19,14 +19,14 @@ Token 通过环境变量注入：`MCD_MCP_TOKEN`。也可以在客户端里配�
 # 查询可办派对的城市
 python -m mcdparty cities --keyword 杭州
 
-# 生成策划案（默认 dry-run，不下单）
+# 生成策划案（只查询，不下单）
 python -m mcdparty plan --city 杭州 --occasion birthday --size 12
 
 # 生成 HTML 邀请函
 python -m mcdparty plan --city 杭州 --date 2026-11-08 --format html -o invite.html
 
 # 确认无误后下单
-python -m mcdparty book --city 杭州 --date 2026-11-08 --session S102 --size 12 --confirm
+python -m mcdparty book --city 杭州 --date 2026-11-08 --session S202 --size 12 --confirm
 ```
 
 ## 工作规则
@@ -36,7 +36,7 @@ python -m mcdparty book --city 杭州 --date 2026-11-08 --session S102 --size 12
 3. 数据以 MCP 实时返回为准，不要用训练数据里的门店或日期回答。
 4. Token 保密：不要把 `MCD_MCP_TOKEN` 的值写进任何文件或回复。
 5. 失败处理：401 让用户检查 Token；429 稍后重试，不要连续请求。
-6. 城市或日期不可用时命令会直接报错，不要绕过报错自己编一个结果。
+6. 城市不在可办列表、或下单时日期/场次不可用，命令会直接报错；不要绕过报错自己编一个结果。
 
 ## 场合参考
 

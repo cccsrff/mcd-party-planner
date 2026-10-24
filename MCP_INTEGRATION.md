@@ -16,7 +16,7 @@
 
 | # | Tool | 参数 | 用途 | 返回值处理 |
 | --- | --- | --- | --- | --- |
-| 1 | `query-party-city` | 无 | 可办主题活动的城市 | 取 `cities[]`，按关键词精确匹配；不匹配直接报错，不做兜底 |
+| 1 | `query-party-city` | 无 | 可办主题活动的城市 | 取 `cities[]`，按关键词包含匹配；不匹配直接报错，不做兜底 |
 | 2 | `query-party-store` | `cityId` | 该城市可参与活动的门店 | 取 `stores[]`，当前取首家（未按距离排序） |
 | 3 | `query-partystore-date` | `storeId` | 门店可预约日期 | 取 `dates[]`，优先最近周末 |
 | 4 | `query-partystore-session` | `storeId` + `date` | 指定日期的可预约场次 | 取 `sessions[]`，进入评分 |
@@ -56,4 +56,4 @@ party-order-create        → 必须 --confirm，默认 dry-run
 MCD_MCP_TOKEN=xxx python -m mcdparty.record --city 杭州 --out examples/recorded
 ```
 
-真实响应按 `call__<tool>__<参数哈希>.json` 落盘，回放层 `ReplayTransport` 会**校验录制参数与本次请求是否一致**，不一致直接报错，避免用杭州的数据回答北京的请求。
+`record.py` 把真实响应按 `call__<tool>__<参数哈希>.json` 落盘，回放层 `ReplayTransport` 会**校验 fixture 的录制参数与本次请求是否一致**，不一致直接报错，避免用杭州的数据回答北京的请求。
