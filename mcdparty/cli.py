@@ -31,7 +31,7 @@ FIXTURES_DIR = Path(__file__).resolve().parent.parent / "tests" / "fixtures"
 def _client(args) -> MCPClient:
     token = args.token or os.environ.get("MCD_MCP_TOKEN", "")
     url = args.url or os.environ.get("MCD_MCP_URL", DEFAULT_URL)
-    if args.demo:
+    if getattr(args, "demo", False):
         return MCPClient("demo-token", url=url, transport=ReplayTransport(args.fixtures or FIXTURES_DIR))
     return MCPClient(token, url=url, timeout=args.timeout)
 
@@ -123,16 +123,23 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--token", help="MCP token (default: $MCD_MCP_TOKEN)")
     parser.add_argument("--url", default=DEFAULT_URL, help="MCP endpoint")
     parser.add_argument("--timeout", type=float, default=30.0)
+
+    # shared by every subcommand: offline replay mode
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("--demo", action="store_true",
+                        help="离线回放模式：使用录制的 fixtures，无需 Token")
+    common.add_argument("--fixtures", help="fixture 目录（默认 tests/fixtures）")
+
     sub = parser.add_subparsers(dest="command", required=True)
 
-    p = sub.add_parser("tools", help="列出 MCP 工具")
+    p = sub.add_parser("tools", parents=[common], help="列出 MCP 工具")
     p.set_defaults(func=cmd_tools)
 
-    p = sub.add_parser("cities", help="列出派对城市")
+    p = sub.add_parser("cities", parents=[common], help="列出派对城市")
     p.add_argument("--keyword")
     p.set_defaults(func=cmd_cities)
 
-    p = sub.add_parser("plan", help="生成派对策划案")
+    p = sub.add_parser("plan", parents=[common], help="生成派对策划案")
     p.add_argument("--city", default="杭州")
     p.add_argument("--occasion", default="birthday",
                    choices=["birthday", "team", "family", "tasting"])
@@ -144,21 +151,20 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("-o", "--output")
     p.set_defaults(func=cmd_plan)
 
-    p = sub.add_parser("book", help="预订（默认 dry-run）")
+    p = sub.add_parser("book", parents=[common], help="预订（默认 dry-run）")
     p.add_argument("--city", default="杭州")
     p.add_argument("--date")
     p.add_argument("--size", type=int, default=10)
     p.add_argument("--confirm", action="store_true", help="真正调用 party-order-create")
     p.set_defaults(func=cmd_book)
 
-    p = sub.add_parser("demo", help="离线回放演示（无需 Token）")
+    p = sub.add_parser("demo", parents=[common], help="离线回放演示（无需 Token）")
     p.add_argument("--city", default="杭州")
     p.add_argument("--occasion", default="birthday")
     p.add_argument("--date")
     p.add_argument("--size", type=int, default=10)
     p.add_argument("--budget", type=float)
     p.add_argument("--format", default="markdown", choices=["markdown", "json", "html"])
-    p.add_argument("--fixtures", help="fixture 目录")
     p.set_defaults(func=cmd_demo)
 
     return parser

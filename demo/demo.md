@@ -35,3 +35,13 @@ mcdparty book --city 杭州 --date 2026-10-31 --session S102 --confirm
 ```
 
 > 由 麦麦派对策划师 基于麦当劳 MCP 实时数据生成；价格与库存以官方渠道为准。
+
+
+---
+
+```text
+# 离线演示（fixtures: D:\Data\AppState\WorkBuddy\UserData\2026-10-24-14-06-27\mcd-party-planner\tests\fixtures）
+
+
+MCP 调用链: query-party-city -> query-party-store -> query-partystore-date -> query-partystore-session
+```

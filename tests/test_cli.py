@@ -51,6 +51,13 @@ class TestDemoCommand(unittest.TestCase):
         self.assertIn("<!DOCTYPE html>", out)
         self.assertIn("杭州湖滨餐厅", out)
 
+    def test_tools_demo_lists_party_tools(self):
+        code, out = run_cli(["tools", "--demo"])
+        self.assertEqual(code, 0)
+        self.assertIn("共 33 个工具", out)
+        self.assertIn("query-party-city", out)
+        self.assertIn("party-order-create", out)
+
     def test_demo_missing_fixtures_fails_cleanly(self):
         code, _ = run_cli(["demo", "--fixtures", str(FIXTURES.parent / "nope")])
         self.assertEqual(code, 1)
