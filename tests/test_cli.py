@@ -55,6 +55,14 @@ class TestDemoCommand(unittest.TestCase):
         for line in book_lines:
             self.assertNotIn("--confirm", line, "offline demo must not print a confirming order")
 
+    def test_plan_with_demo_flag_is_also_offline(self):
+        """--demo is a global flag: `plan --demo` must not claim live data either."""
+        code, out = run_cli(["plan", "--demo", "--city", "杭州"])
+        self.assertEqual(code, 0)
+        self.assertIn("非实时数据", out)
+        for line in [l for l in out.splitlines() if l.startswith("mcdparty book")]:
+            self.assertNotIn("--confirm", line)
+
     def test_live_render_does_offer_confirm(self):
         from mcdparty.render import render
         text = render(make_plan(), live=True)

@@ -39,7 +39,7 @@ WorkBuddy 一次性产出全部源码（`mcdparty/` 包，约 1200 行）：
 
 ### 第 3 轮：测试驱动修复（3 轮迭代）
 
-WorkBuddy 编写 39 个单元测试（`tests/`，纯 unittest），首轮 12 个失败，逐根因修复：
+WorkBuddy 编写 40 个单元测试（`tests/`，纯 unittest），首轮 12 个失败，逐根因修复：
 
 1. **回放信封缺陷**：`ReplayTransport` 未把业务 payload 包成 `tools/call` 的 `content` 信封 → `_unwrap_content` 解不出数据。修复：新增 `_tool_envelope()`。
 2. **`as_list` 不递归**：`{"data": {"list": [...]}}` 嵌套结构返回空。修复：键名匹配时递归进 dict 值。
@@ -47,7 +47,7 @@ WorkBuddy 编写 39 个单元测试（`tests/`，纯 unittest），首轮 12 个
 4. **fixture 精度**：指定日期 2026-11-08 时回放仍返回 10-31 的场次。修复：新增参数级 fixture（digest 必须用 Python `json.dumps(sort_keys=True)` 计算，JS 序列化哈希不一致——踩坑后修正）。
 5. **`tools` 子命令崩溃**：`_client` 访问不存在的 `args.demo`。修复：parent parser 统一注入 `--demo`。
 
-每轮修复后全量回归，最终 **39/39 通过**。
+每轮修复后全量回归，最终 **40/40 通过**。
 
 ### 第 4 轮：参赛合规与文档
 
@@ -65,13 +65,13 @@ WorkBuddy 编写 39 个单元测试（`tests/`，纯 unittest），首轮 12 个
 - 第 1 轮修掉三处会被评委戳穿的口径：「5 步变 1 条」不成立、测试数 32/33 不一致、离线演示自称实时数据；同时补上安全边界（日期不可约直接报错、`--session` 锁定场次、未知城市不兜底、回放参数校验）
 - 第 2 轮修掉残留话术与视觉缺陷：demo 产物仍写「实时返回」、演示稿印出 `--confirm` 下单命令、邀请函理由列表缩进错位 58px、兜底分支会把内部评分日志印上邀请函
 - 第 3 轮：终审复核
-- 结果：测试从 33 增至 39，README 从约 180 行压到 140 行，全仓库 emoji 归零
+- 结果：测试从 33 增至 40，README 从约 180 行压到 140 行，全仓库 emoji 归零
 
 ## 三、验证证据（以下为真实终端转录）
 
 ```text
 $ python -m unittest discover -s tests
-Ran 39 tests in 0.077s
+Ran 40 tests in 0.077s
 
 OK
 

@@ -37,7 +37,7 @@ PartyPlan（选择理由 + 完整 tool_trace）
 party-order-create        → 必须 --confirm，默认 dry-run
 ```
 
-每次调用的请求与响应都记录在 `plan.tool_trace` 中，`--format json` 可导出，结果可审计、可复现。
+每次调用的请求参数与响应原文都记录在 `plan.tool_trace` 中；`--format json` 会连同参数和响应一并导出，结果可审计、可复现。
 
 ## 错误处理
 

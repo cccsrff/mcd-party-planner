@@ -80,7 +80,7 @@ def cmd_plan(args) -> int:
     )
     client = _client(args)
     plan = PartyPlanner(client).plan(request)
-    _emit(render(plan, args.format, live=True), args,
+    _emit(render(plan, args.format, live=not getattr(args, "demo", False)), args,
           suffix=".md" if args.format == "markdown" else f".{args.format}")
     return 0
 

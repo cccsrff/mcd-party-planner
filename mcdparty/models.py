@@ -216,5 +216,6 @@ class Plan:
                 "price": self.chosen.price,
             } if self.chosen else None,
             "reasons": self.reasons,
-            "tool_trace": [t["tool"] for t in self.tool_trace],
+            # full request/response per call, so the JSON export is auditable
+            "tool_trace": self.tool_trace,
         }

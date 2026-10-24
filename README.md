@@ -14,7 +14,7 @@
 ## 为什么是派对
 
 - **决策最长**：4 个维度、多个候选，人工比场次的成本最高
-- **示例最少**：33 个工具里派对只占 5 个，官方三个示例方向都不覆盖
+- **示例最少**：官方三个示例方向（点餐、省钱、活动推荐）都不涉及派对
 - **有交付物**：最终产物是一张能发给家人的邀请函，不只是一段 JSON
 
 ## 快速开始（不需要 Token）
@@ -104,7 +104,7 @@ python -m mcdparty plan --city 杭州 --date 2026-11-08 --format html -o invite.
 安全边界：
 
 - `plan` 只查询，从不下单；`book` 默认 dry-run，不加 `--confirm` 不碰下单接口
-- 指定日期不可约时**直接报错**，不会悄悄改期
+- 下单时指定日期不可约，直接报错，不会悄悄改期
 - `--session` 锁定场次 ID，跳过重新评分——看到哪场就订哪场
 - 城市不在可办列表时直接报错，不会替你换到别的城市
 - 离线回放时若录制参数与请求不符，直接报错，不会拿杭州的数据回答北京
@@ -121,7 +121,7 @@ python -m mcdparty plan --city 杭州 --date 2026-11-08 --format html -o invite.
 python -m unittest discover -s tests
 ```
 
-39 个用例，全部离线（无网络、无 Token），每次 push 由 GitHub Actions 在 Python 3.9 与 3.12 上各跑一遍。覆盖 MCP 协议握手与 SSE 解析、401/429 映射、选场决策、严格日期、场次锁定、回放参数校验、离线产物不得自称实时数据。
+40 个用例，全部离线（无网络、无 Token），每次 push 由 GitHub Actions 在 Python 3.9 与 3.12 上各跑一遍。覆盖 MCP 协议握手与 SSE 解析、401/429 映射、选场决策、严格日期、场次锁定、回放参数校验、离线产物不得自称实时数据。
 
 ## 项目结构
 
@@ -134,7 +134,7 @@ mcdparty/
   record.py       录制真实响应为 fixtures
   chat.py         可选的 LLM 工具调用模式
   cli.py          命令行入口
-tests/            39 个用例 + fixtures
+tests/            40 个用例 + fixtures
 skill/SKILL.md    WorkBuddy Skill 打包
 ```
 
