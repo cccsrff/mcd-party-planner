@@ -1,0 +1,23 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: unit tests (offline, no token)
+        run: python -m unittest discover -s tests -v
+      - name: offline demo smoke test
+        run: |
+          python -m mcdparty demo --format json > /tmp/plan.json
+          python -c "import json;d=json.load(open('/tmp/plan.json'));assert d['chosen_session'],'no session';print('demo ok:',d['store'],d['chosen_session']['start'])"

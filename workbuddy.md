@@ -5,7 +5,7 @@
 
 ## 一、任务输入
 
-用户发送活动截图（1024 造物挑战 / 麦当劳程序员创意开发大赛），要求"帮我完成一下，做的好一点"。
+用户发送活动截图（1024 造物挑战 / 麦当劳程序员创意开发大赛），要求「帮我完成一下，做的好一点」。
 大赛硬性要求（从官方仓库 M-China/mcd-developer-innovation-challenge 拉取）：
 
 - 基于麦当劳 MCP（`https://mcp.mcd.cn`）开发 Skill，**必须真实调用**
@@ -19,7 +19,7 @@
 - WorkBuddy 拉取 `activityGuidelines.md`、`mcd-mcp-server` README、`CONTEST_DECLARATION.md` 原文
 - 枚举 MCP 全部 33 个 Tool，判断赛道：官方示例（点餐/省钱/活动推荐）必然扎堆；
   **v1.0.7 新增的派对工具链（query-party-city → store → date → session → order）使用人数最少**
-- 选题确定：**「麦麦派对策划师」**——把 5 步预订向导压缩为 1 条命令，可解释推荐 + HTML 邀请函 + 默认 dry-run 下单
+- 选题确定：**「麦麦派对策划师」**——把 4 次查询压成 1 条命令，可解释推荐 + HTML 邀请函 + 默认 dry-run 下单
 - 与用户确认两件只能由用户做的事：MCP Token 申请（open.mcd.cn/mcp 手机登录）、GitHub 推送授权
 
 ### 第 2 轮：架构与编码（纯标准库，零依赖）
@@ -37,9 +37,9 @@ WorkBuddy 一次性产出全部源码（`mcdparty/` 包，约 1200 行）：
 | `cli.py` | 命令行 | `plan`/`book`/`cities`/`tools`/`demo`/`chat`；`book` 默认 dry-run |
 | `chat.py` | 可选 LLM 模式 | OpenAI 兼容端点驱动工具调用；**下单调用强制拦截**待人工确认 |
 
-### 第 3 轮：测试驱动修复（3 轮迭代，零静默失败）
+### 第 3 轮：测试驱动修复（3 轮迭代）
 
-WorkBuddy 编写 33 个单元测试（`tests/`，纯 unittest），首轮 12 个失败，逐根因修复：
+WorkBuddy 编写 37 个单元测试（`tests/`，纯 unittest），首轮 12 个失败，逐根因修复：
 
 1. **回放信封缺陷**：`ReplayTransport` 未把业务 payload 包成 `tools/call` 的 `content` 信封 → `_unwrap_content` 解不出数据。修复：新增 `_tool_envelope()`。
 2. **`as_list` 不递归**：`{"data": {"list": [...]}}` 嵌套结构返回空。修复：键名匹配时递归进 dict 值。
@@ -47,7 +47,7 @@ WorkBuddy 编写 33 个单元测试（`tests/`，纯 unittest），首轮 12 个
 4. **fixture 精度**：指定日期 2026-11-08 时回放仍返回 10-31 的场次。修复：新增参数级 fixture（digest 必须用 Python `json.dumps(sort_keys=True)` 计算，JS 序列化哈希不一致——踩坑后修正）。
 5. **`tools` 子命令崩溃**：`_client` 访问不存在的 `args.demo`。修复：parent parser 统一注入 `--demo`。
 
-每轮修复后全量回归，最终 **33/33 通过**。
+每轮修复后全量回归，最终 **37/37 通过**。
 
 ### 第 4 轮：参赛合规与文档
 
@@ -62,7 +62,7 @@ WorkBuddy 编写 33 个单元测试（`tests/`，纯 unittest），首轮 12 个
 
 ```text
 $ python -m unittest discover -s tests
-Ran 33 tests in 0.056s
+Ran 37 tests in 0.056s
 OK
 
 $ python -m mcdparty tools --demo
@@ -71,17 +71,17 @@ $ python -m mcdparty tools --demo
  ★ query-partystore-session / party-order-create
 
 $ python -m mcdparty demo --city 杭州 --occasion birthday --size 12
-# 🎂 生日派对 · 麦麦派对策划案
-- 门店：杭州湖滨餐厅 | 日期：10 月 31 日（周六）| 场次：14:00 - 16:00
-- 理由：周末场 +3 / 下午场适合小朋友 / 容量 20 ≥ 12 人
-MCP 调用链: query-party-city -> query-party-store -> query-partystore-date -> query-partystore-session
+# 生日派对策划案
+- 门店：杭州湖滨餐厅（上城区平海路 118 号）| 日期：10 月 31 日（周六）| 场次：14:00 - 16:00
+- 理由：周末场 +3 / 下午场适合小朋友 / 容量 20 人 ≥ 预计 12 人
+调用链：query-party-city -> query-party-store -> query-partystore-date -> query-partystore-session
 ```
 
 ## 四、后续步骤（需用户配合）
 
-1. 用户获取麦当劳 MCP Token → WorkBuddy 用 `python -m mcdparty.record` 录制真实响应、跑通在线 `plan`
-2. 用户完成 GitHub 浏览器授权 → WorkBuddy 创建公开仓库、推送、提交官方报名 Issue
-3. 定榜前持续运营（README 演示、开发实录文章）争取 Star
+1. 用户获取麦当劳 MCP Token → 用 `python -m mcdparty.record` 录制真实响应、跑通在线 `plan`
+2. 用户完成 GitHub 授权 → 创建公开仓库、推送代码
+3. 真实数据入库后提交官方报名 Issue
 
 ---
 

@@ -43,6 +43,14 @@ def _tool_envelope(payload: Any) -> Tuple[int, Dict[str, str], bytes]:
     return _envelope(result)
 
 
+class FixtureMismatch(RuntimeError):
+    """A fixture recorded for different arguments was about to be replayed.
+
+    Silently serving Hangzhou store data for a Beijing request would be a lie
+    in the output, so the replay layer refuses instead.
+    """
+
+
 class ReplayTransport:
     """Transport backed by recorded fixture files. Raises on unknown calls."""
 
@@ -82,6 +90,12 @@ class ReplayTransport:
                 raise FileNotFoundError(
                     f"missing fixture call__{tool}.json in {self.dir} "
                     f"(args: {json.dumps(args, ensure_ascii=False)})"
+                )
+            recorded = fixture.get("arguments")
+            if recorded is not None and recorded != args:
+                raise FixtureMismatch(
+                    f"{tool}: 录制参数 {json.dumps(recorded, ensure_ascii=False)} "
+                    f"与本次请求 {json.dumps(args, ensure_ascii=False)} 不一致"
                 )
             payload = fixture.get("payload", fixture.get("result", fixture))
             return _tool_envelope(payload)

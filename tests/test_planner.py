@@ -56,11 +56,13 @@ class TestPlanFlow(unittest.TestCase):
         # team: evening slot 18:30-20:30 beats the kid-friendly afternoon slot
         self.assertEqual(plan.chosen.session_id, "S103")
 
-    def test_unknown_city_falls_back(self):
+    def test_unknown_city_is_rejected_not_swapped(self):
+        """Never plan a party in a city the user did not ask for."""
         planner, _ = make_planner()
-        plan = planner.plan(PartyRequest(city="拉萨", occasion="birthday"))
-        self.assertIsNotNone(plan.city)
-        self.assertTrue(any("默认取首个城市" in r for r in plan.reasons))
+        with self.assertRaises(RuntimeError) as ctx:
+            planner.plan(PartyRequest(city="拉萨", occasion="birthday"))
+        self.assertIn("不在可办派对的城市列表", str(ctx.exception))
+        self.assertIn("杭州", str(ctx.exception))
 
     def test_book_is_dry_run_by_default(self):
         planner, _ = make_planner()
@@ -74,10 +76,30 @@ class TestPlanFlow(unittest.TestCase):
 
     def test_budget_penalty(self):
         planner, _ = make_planner()
-        # ¥150 budget: only S104 (¥188) exceeds... actually all are >=150 except none;
-        # set budget 100 so every session is over budget -> afternoon slot still wins
+        # ¥100 budget: every session exceeds it, the afternoon slot still wins
         plan = planner.plan(PartyRequest(city="杭州", party_size=10, budget=100))
         self.assertTrue(any("超预算" in r for r in plan.reasons))
+
+    def test_strict_date_refuses_to_reschedule(self):
+        """Booking path must never silently move to another date."""
+        planner, _ = make_planner()
+        with self.assertRaises(RuntimeError) as ctx:
+            planner.plan(PartyRequest(city="杭州", date="2026-11-02"),
+                         strict_date=True)
+        self.assertIn("不可约", str(ctx.exception))
+        self.assertIn("未做任何改期", str(ctx.exception))
+
+    def test_pin_session_skips_scoring(self):
+        """What the user reviewed is what gets ordered."""
+        planner, _ = make_planner()
+        plan = planner.plan(PartyRequest(city="杭州", occasion="birthday"), pin_session="S103")
+        self.assertEqual(plan.chosen.session_id, "S103")
+        self.assertTrue(any("未参与自动评分" in r for r in plan.reasons))
+
+    def test_pin_unknown_session_fails(self):
+        planner, _ = make_planner()
+        with self.assertRaises(RuntimeError):
+            planner.plan(PartyRequest(city="杭州"), pin_session="NOPE")
 
 
 if __name__ == "__main__":

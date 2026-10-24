@@ -41,7 +41,7 @@ class TestDemoCommand(unittest.TestCase):
     def test_demo_markdown(self):
         code, out = run_cli(["demo"])
         self.assertEqual(code, 0)
-        self.assertIn("麦麦派对策划案", out)
+        self.assertIn("生日派对策划案", out)
         self.assertIn("14:00 - 16:00", out)
         self.assertIn("mcdparty book", out)
 
@@ -62,6 +62,12 @@ class TestDemoCommand(unittest.TestCase):
         code, _ = run_cli(["demo", "--fixtures", str(FIXTURES.parent / "nope")])
         self.assertEqual(code, 1)
 
+    def test_demo_refuses_city_outside_fixtures(self):
+        """Offline data covers Hangzhou only - say so instead of showing Hangzhou stores."""
+        code, out = run_cli(["demo", "--city", "北京"])
+        self.assertEqual(code, 1)
+        self.assertNotIn("杭州湖滨餐厅", out)
+
 
 class TestRendering(unittest.TestCase):
     def setUp(self):
@@ -69,7 +75,7 @@ class TestRendering(unittest.TestCase):
 
     def test_markdown_contains_core_fields(self):
         text = render_markdown(self.plan)
-        for needle in ("杭州", "湖滨", "10 月 31 日", "S102", "为什么选这一场"):
+        for needle in ("杭州", "湖滨", "10 月 31 日", "S102", "选择理由"):
             self.assertIn(needle, text)
 
     def test_html_is_self_contained(self):

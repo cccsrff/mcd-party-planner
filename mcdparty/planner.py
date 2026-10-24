@@ -63,10 +63,13 @@ class PartyPlanner:
         keyword = (request.city or "").strip()
         for city in cities:
             if keyword and (keyword in city.name or city.name in keyword):
-                plan.reasons.append(f"城市匹配「{city.name}」")
+                plan.city_matched = True
                 return city
-        plan.reasons.append(f"未找到「{keyword}」，默认取首个城市 {cities[0].name}")
-        return cities[0]
+        raise RuntimeError(
+            f"「{keyword or '（空）'}」不在可办派对的城市列表里，不会替你改到别的城市。"
+            f"可选：{'、'.join(c.name for c in cities[:8])}"
+            f"{' 等' if len(cities) > 8 else ''}（共 {len(cities)} 城）"
+        )
 
     # ----------------------------------------------------------------- step 2
     def resolve_store(self, city: City, request: PartyRequest, plan: Plan) -> Store:
@@ -79,7 +82,9 @@ class PartyPlanner:
             raise RuntimeError(f"query-party-store returned no stores for {city.name}")
         plan.stores = stores
         store = stores[0]
-        plan.reasons.append(f"门店选择「{store.name}」（该城市共 {len(stores)} 家可选）")
+        plan.reasons.append(
+            f"门店取列表首家「{store.name}」（当前未按距离或评分排序，{len(stores)} 家可选）"
+        )
         return store
 
     # ----------------------------------------------------------------- step 3
@@ -157,14 +162,37 @@ class PartyPlanner:
         return best
 
     # ------------------------------------------------------------------ flow
-    def plan(self, request: PartyRequest) -> Plan:
+    def plan(self, request: PartyRequest, pin_session: str = "",
+             strict_date: bool = False) -> Plan:
+        """Resolve a full plan.
+
+        ``strict_date``: when the caller named a date that is not bookable,
+        fail loudly instead of silently moving to another date (booking path).
+        ``pin_session``: book exactly this slot, skipping the scoring step
+        (so what the user reviewed is what gets ordered).
+        """
         plan = Plan(request=request)
         plan.city = self.resolve_city(request, plan)
         plan.store = self.resolve_store(plan.city, request, plan)
         dates = self.resolve_dates(plan.store, request, plan)
 
         target = request.date if request.date in dates else self._pick_date(dates, request, plan)
+        if strict_date and request.date and request.date not in dates:
+            raise RuntimeError(
+                f"{request.date} 不可约；可约日期：{', '.join(dates[:6])}。"
+                "未做任何改期，也未下单。"
+            )
         sessions = self.resolve_sessions(plan.store, target, plan)
+        if pin_session:
+            pinned = [s for s in sessions if s.session_id == pin_session]
+            if not pinned:
+                raise RuntimeError(
+                    f"场次 {pin_session} 在 {target} 不存在；可选："
+                    + ", ".join(s.session_id for s in sessions)
+                )
+            plan.chosen = pinned[0]
+            plan.reasons.append(f"按指定场次 {pin_session} 预订，未参与自动评分")
+            return plan
         self.choose_session(request, plan)
         return plan
 
@@ -173,9 +201,13 @@ class PartyPlanner:
             plan.reasons.append(f"指定日期 {request.date} 不可约，已自动改选")
         weekend = [d for d in dates if (self._weekday(d) or -1) in WEEKEND]
         if request.prefer_weekend and weekend:
-            plan.reasons.append(f"自动选定最近周末 {weekend[0]}（共 {len(weekend)} 个周末可约）")
+            if len(weekend) == len(dates):
+                tail = f"共 {len(dates)} 天可约，全部是周末"
+            else:
+                tail = f"{len(weekend)} 天周末可约，共 {len(dates)} 天可选"
+            plan.reasons.append(f"自动选定最近周末 {weekend[0]}（{tail}）")
             return weekend[0]
-        plan.reasons.append(f"自动选定最近可约日期 {dates[0]}")
+        plan.reasons.append(f"自动选定最近可约日期 {dates[0]}（共 {len(dates)} 天可选）")
         return dates[0]
 
     # --------------------------------------------------------------- booking

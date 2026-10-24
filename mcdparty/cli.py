@@ -23,7 +23,7 @@ from .mcp_client import DEFAULT_URL, MCPClient, MCPError
 from .models import PartyRequest
 from .planner import PartyPlanner
 from .render import render
-from .replay import ReplayTransport
+from .replay import FixtureMismatch, ReplayTransport
 
 FIXTURES_DIR = Path(__file__).resolve().parent.parent / "tests" / "fixtures"
 
@@ -39,7 +39,7 @@ def _client(args) -> MCPClient:
 def _emit(text: str, args, suffix: str = ".md") -> None:
     if getattr(args, "output", None):
         Path(args.output).write_text(text, encoding="utf-8")
-        print(f"written: {args.output}", file=sys.stderr)
+        print(f"已写入：{args.output}", file=sys.stderr)
     else:
         print(text)
 
@@ -65,7 +65,7 @@ def cmd_cities(args) -> int:
         cities = [c for c in cities if args.keyword in c.name]
     for city in cities:
         print(f"{city.city_id:<12} {city.name}")
-    print(f"-- {len(cities)} 个城市", file=sys.stderr)
+    print(f"共 {len(cities)} 个城市", file=sys.stderr)
     return 0
 
 
@@ -89,28 +89,52 @@ def cmd_book(args) -> int:
     request = PartyRequest(city=args.city, party_size=args.size, date=args.date)
     client = _client(args)
     planner = PartyPlanner(client)
-    plan = planner.plan(request)
+    plan = planner.plan(request, pin_session=args.session, strict_date=True)
+    chosen = plan.chosen
+    print(
+        f"待下单：{plan.store.name if plan.store else '-'} · "
+        f"{chosen.date if chosen else '-'} · "
+        f"{chosen.start + '-' + chosen.end if chosen else '-'} · "
+        f"{args.size} 人",
+        file=sys.stderr,
+    )
+    for reason in plan.reasons:
+        print(f"  - {reason}", file=sys.stderr)
     result = planner.book(plan, confirm=args.confirm, people=args.size)
     print(json.dumps(result, ensure_ascii=False, indent=2))
     if not args.confirm:
-        print("\n( dry-run：未真正下单。确认无误后加 --confirm 执行 )", file=sys.stderr)
+        print("dry-run：未下单，确认后加 --confirm", file=sys.stderr)
     return 0
 
 
 def cmd_demo(args) -> int:
-    """Offline end-to-end replay - the transcript shown in the README."""
+    """Offline replay of recorded MCP responses - no network, no token."""
     args.demo = True
     request = PartyRequest(
         city=args.city, occasion=args.occasion, date=args.date,
         party_size=args.size, budget=args.budget,
     )
     client = _client(args)
-    print(f"# 离线演示（fixtures: {args.fixtures or FIXTURES_DIR}）\n", file=sys.stderr)
-    plan = PartyPlanner(client).plan(request)
+    try:
+        plan = PartyPlanner(client).plan(request)
+    except FixtureMismatch:
+        print(
+            f"内置演示数据没有「{request.city}」的记录，不做兜底。"
+            "接入真实 MCP 后可查任意城市（见 README「接入真实 MCP」）。",
+            file=sys.stderr,
+        )
+        return 1
+    if plan.city and not plan.city_matched:
+        print(
+            f"内置演示数据不覆盖「{request.city}」，不做兜底。"
+            "接入真实 MCP 后可查任意城市（见 README「接入真实 MCP」）。",
+            file=sys.stderr,
+        )
+        return 1
     _emit(render(plan, args.format), args,
           suffix=".md" if args.format == "markdown" else f".{args.format}")
     trace = " -> ".join(t["tool"] for t in plan.tool_trace)
-    print(f"\nMCP 调用链: {trace}", file=sys.stderr)
+    print(f"\n调用链：{trace}", file=sys.stderr)
     return 0
 
 
@@ -153,7 +177,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("book", parents=[common], help="预订（默认 dry-run）")
     p.add_argument("--city", default="杭州")
-    p.add_argument("--date")
+    p.add_argument("--date", help="指定日期；不可约会直接报错，不会自动改期")
+    p.add_argument("--session", default="", help="锁定场次 ID（见 plan 输出），跳过自动评分")
     p.add_argument("--size", type=int, default=10)
     p.add_argument("--confirm", action="store_true", help="真正调用 party-order-create")
     p.set_defaults(func=cmd_book)
