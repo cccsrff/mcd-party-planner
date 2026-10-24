@@ -11,6 +11,16 @@ script finishes everything:
   5. submit the contest issue (POST /repos/M-China/.../issues, official format)
   6. verify everything        (repo public? issue present? files pushed?)
 
+Recommended invocation (GCM needs the proxy dropped, and python's subprocess
+must not be the one calling it):
+
+    TOKEN=$(env -u HTTP_PROXY -u HTTPS_PROXY git credential fill <<'EOF' | ...extract password=...)
+    protocol=https
+    host=github.com
+
+    EOF
+    GITHUB_TOKEN="$TOKEN" python scripts/github_release.py --go
+
 Dry-run by default: pass --go to actually execute. The official rules warn
 that the issue body must NOT contain newlines inside the three fields and
 must not use markdown links for the project URL - both are enforced here.
@@ -78,14 +88,20 @@ def resolve_token(explicit: str | None) -> str:
     if env:
         return env
     # Git Credential Manager cache (populated by the browser login).
-    # NOTE: with no cached credential GCM may pop a GUI window or hang,
-    # so this is bounded by a hard timeout and any failure degrades to a
-    # clear error message instead of blocking the whole run.
+    # GCM is a .NET app and strictly honours HTTP(S)_PROXY; when a local
+    # sandbox proxy answers the OAuth token exchange with 502 the credential
+    # never lands in the store. Stripping the proxy vars makes GCM talk to
+    # github.com directly, which is what the browser login already proved works.
+    clean_env = {
+        k: v for k, v in os.environ.items()
+        if k.lower() not in ("http_proxy", "https_proxy", "all_proxy")
+    }
     try:
         proc = subprocess.run(
             ["git", "credential", "fill"],
             input="protocol=https\nhost=github.com\n\n",
-            capture_output=True, text=True, cwd=ROOT, timeout=20,
+            capture_output=True, text=True, cwd=ROOT,
+            timeout=25, env=clean_env,
         )
         fields = dict(
             line.split("=", 1)
@@ -100,7 +116,7 @@ def resolve_token(explicit: str | None) -> str:
     raise GitHubError(
         "no GitHub token available: pass --token, set GITHUB_TOKEN, "
         "or complete the browser login first (git credential fill timed out "
-        "or returned nothing - GCM needs an interactive session)"
+        "or returned nothing)"
     )
 
 
