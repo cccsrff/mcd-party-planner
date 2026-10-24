@@ -1,0 +1,10 @@
+{
+  "arguments": {"storeId": "33010001", "date": "2026-11-08"},
+  "payload": {
+    "sessions": [
+      {"sessionId": "S201", "date": "2026-11-08", "startTime": "10:00", "endTime": "12:00", "capacity": 20, "price": 168},
+      {"sessionId": "S202", "date": "2026-11-08", "startTime": "14:00", "endTime": "16:00", "capacity": 20, "price": 168},
+      {"sessionId": "S203", "date": "2026-11-08", "startTime": "18:30", "endTime": "20:30", "capacity": 16, "price": 168}
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "result": {
+    "tools": [
+      {"name": "list-nutrition-foods", "description": "餐品营养信息列表：获取麦当劳常见餐品的营养成分数据"},
+      {"name": "delivery-query-addresses", "description": "获取用户可配送地址列表"},
+      {"name": "delivery-create-address", "description": "新增配送地址"},
+      {"name": "delivery-query-stores", "description": "外送场景下查询用户收货地址附近可配送门店"},
+      {"name": "query-meal-assistance", "description": "查询助餐服务（企业团餐场景）"},
+      {"name": "query-nearby-stores", "description": "查询用户提供地址附近的麦当劳餐厅"},
+      {"name": "query-store-coupons", "description": "查询用户当前门店下可用的优惠券列表"},
+      {"name": "query-meals", "description": "查询当前门店可售卖的餐品列表"},
+      {"name": "query-meal-detail", "description": "根据餐品编码查询餐品详情"},
+      {"name": "calculate-price", "description": "根据用户选购商品列表计算商品金额、配送费、优惠金额及应付总价"},
+      {"name": "create-order", "description": "创建订单，返回订单详情与支付链接"},
+      {"name": "cancel-order", "description": "取消点餐订单"},
+      {"name": "query-order", "description": "查询订单状态、订单内容、配送信息"},
+      {"name": "order-list", "description": "查询近期的到店/外送历史订单"},
+      {"name": "campaign-calendar", "description": "查询麦当劳中国当月的营销活动日历"},
+      {"name": "available-coupons", "description": "查询用户当前可领取的麦麦省的优惠券列表"},
+      {"name": "auto-bind-coupons", "description": "自动领取麦麦省所有当前可用的麦当劳优惠券"},
+      {"name": "query-my-coupons", "description": "查询用户有哪些可用的优惠券"},
+      {"name": "query-my-account", "description": "查询用户积分账户信息"},
+      {"name": "mall-points-products", "description": "查询麦麦商城商品列表"},
+      {"name": "mall-product-detail", "description": "查询麦麦商城商品详情"},
+      {"name": "mall-create-order", "description": "使用积分兑换虚拟或实物商品"},
+      {"name": "mall-order-list", "description": "查询麦麦商城订单列表"},
+      {"name": "mall-order-detail", "description": "查询麦麦商城订单详情"},
+      {"name": "now-time-info", "description": "返回当前的完整时间信息"},
+      {"name": "query-lottery-info", "description": "查询当前积分抽奖活动信息"},
+      {"name": "draw-lottery", "description": "执行一次积分抽奖"},
+      {"name": "query-my-prizes", "description": "查看我的奖品记录"},
+      {"name": "query-party-city", "description": "主题活动城市列表查询：查询主题活动商品对应的可参与城市列表"},
+      {"name": "query-party-store", "description": "主题活动门店列表查询：查询指定城市下主题活动可参与的门店列表"},
+      {"name": "query-partystore-date", "description": "主题活动可预约日期查询：查询指定门店下主题活动的可预约日期列表"},
+      {"name": "query-partystore-session", "description": "主题活动可预约日期场次查询：查询指定门店、指定日期下主题活动的可预约场次列表"},
+      {"name": "party-order-create", "description": "主题活动订单创建：创建主题活动订单"}
+    ]
+  }
+}

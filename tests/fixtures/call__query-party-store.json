@@ -1,0 +1,10 @@
+{
+  "arguments": {"cityId": "330100"},
+  "result": {
+    "stores": [
+      {"storeId": "33010001", "storeName": "杭州湖滨餐厅", "address": "上城区平海路 118 号"},
+      {"storeId": "33010002", "storeName": "杭州武林餐厅", "address": "拱墅区延安路 578 号"},
+      {"storeId": "33010003", "storeName": "杭州滨江餐厅", "address": "滨江区江南大道 1090 号"}
+    ]
+  }
+}

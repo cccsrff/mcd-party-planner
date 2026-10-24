@@ -1,0 +1,18 @@
+{
+  "result": {
+    "cities": [
+      {"cityId": "110000", "cityName": "北京"},
+      {"cityId": "310000", "cityName": "上海"},
+      {"cityId": "440100", "cityName": "广州"},
+      {"cityId": "440300", "cityName": "深圳"},
+      {"cityId": "330100", "cityName": "杭州"},
+      {"cityId": "320100", "cityName": "南京"},
+      {"cityId": "320500", "cityName": "苏州"},
+      {"cityId": "510100", "cityName": "成都"},
+      {"cityId": "420100", "cityName": "武汉"},
+      {"cityId": "610100", "cityName": "西安"},
+      {"cityId": "500000", "cityName": "重庆"},
+      {"cityId": "120000", "cityName": "天津"}
+    ]
+  }
+}

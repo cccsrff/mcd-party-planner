@@ -1,0 +1,11 @@
+{
+  "arguments": {"storeId": "33010001", "date": "2026-10-31"},
+  "result": {
+    "sessions": [
+      {"sessionId": "S101", "date": "2026-10-31", "startTime": "10:00", "endTime": "12:00", "capacity": 8, "price": 168},
+      {"sessionId": "S102", "date": "2026-10-31", "startTime": "14:00", "endTime": "16:00", "capacity": 20, "price": 168},
+      {"sessionId": "S103", "date": "2026-10-31", "startTime": "18:30", "endTime": "20:30", "capacity": 20, "price": 168},
+      {"sessionId": "S104", "date": "2026-10-31", "startTime": "19:00", "endTime": "21:00", "capacity": 15, "price": 188}
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+dist/
+build/
+.pytest_cache/
+.DS_Store
+# 永远不要提交真实 Token
+*.token
+.env
